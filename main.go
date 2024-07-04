@@ -277,7 +277,7 @@ func SetTask(w http.ResponseWriter, r *http.Request) {
 		if len(task.Date) == 0 || task.Date == "" {
 			task.Date = nowTime.Format("20060102")
 		}
-		if task.Date <= nowTime.Format("20060102") {
+		if task.Date < nowTime.Format("20060102") {
 			task.Date, err = NextDate(nowTime, task.Date, task.Repeat)
 			if err != nil {
 				fmt.Printf("nextDate err: %v", err)
@@ -463,26 +463,9 @@ func EditTask(w http.ResponseWriter, r *http.Request) {
 		return
 
 	}
-	nowTime := time.Now()
-	nextDate, err := NextDate(nowTime, task.Date, task.Repeat)
-	if err != nil {
-		respError := map[string]string{"error": "Ошибка функции nextDate"}
-		resp, err := json.Marshal(respError)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write(resp)
-		return
-	}
-	if len(task.Date) == 0 || task.Date == "" {
-		nextDate, err = NextDate(nowTime, nowTime.Format("20060102"), task.Repeat)
-	}
 	dateTimeCheck, err := time.Parse("20060102", task.Date)
-	fmt.Printf("checking dateTIMe: %v", dateTimeCheck)
-	if err != nil && len(task.Date) != 0 {
+	fmt.Printf("checking dateTIMe: %v, taskDate:%v ", dateTimeCheck, task.Date)
+	if err != nil && len(task.Date) != 0 && task.Date != "" {
 		respError := map[string]string{"error": "Неправильный формат даты"}
 		resp, err := json.Marshal(respError)
 		if err != nil {
@@ -495,13 +478,45 @@ func EditTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	nowTime := time.Now()
+	if len(task.Repeat) != 0 && task.Repeat != "" {
+		fmt.Printf("date: %v, title: %v,comment: %v, repeat: %v ", task.Date, task.Title, task.Comment, task.Repeat)
+		if len(task.Date) == 0 || task.Date == "" {
+			task.Date = nowTime.Format("20060102")
+		}
+		if task.Date <= nowTime.Format("20060102") {
+			task.Date, err = NextDate(nowTime, task.Date, task.Repeat)
+			if err != nil {
+				fmt.Printf("nextDate err: %v", err)
+				respError := map[string]string{"error": "Ошибка функции nextDate"}
+				resp, err := json.Marshal(respError)
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusBadRequest)
+					return
+				}
+				w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+				w.WriteHeader(http.StatusBadRequest)
+				w.Write(resp)
+				return
+			}
+
+		}
+	}
+
+	if len(task.Repeat) == 0 || task.Repeat == "" {
+		if len(task.Date) == 0 || task.Date == "" || task.Date < nowTime.Format("20060102") {
+			task.Date = nowTime.Format("20060102")
+		}
+
+	}
+
 	sqliteDatabase, err := sql.Open("sqlite", "./scheduler.db")
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 	defer sqliteDatabase.Close()
 	_, err = sqliteDatabase.Exec("UPDATE scheduler SET date= :date, title= :title, comment= :comment, repeat= :repeat WHERE id = :id",
-		sql.Named("date", nextDate),
+		sql.Named("date", task.Date),
 		sql.Named("title", task.Title),
 		sql.Named("comment", task.Comment),
 		sql.Named("repeat", task.Repeat),
@@ -605,6 +620,7 @@ func DoneTask(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		//fmt.Println(fmt.Sprintf("%v", bytes.ReplaceAll(resp, []byte("\""), []byte(""))))
 		w.Write(resp)
+		return
 
 	}
 
@@ -657,6 +673,91 @@ func DoneTask(w http.ResponseWriter, r *http.Request) {
 	w.Write(resp)
 }
 
+func DeleteTask(w http.ResponseWriter, r *http.Request) {
+	getTask := Tasks{}
+	id := r.FormValue("id")
+	if len(id) == 0 {
+		respError := map[string]string{"error": "Не указан идентификатор"}
+		resp, err := json.Marshal(respError)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write(resp)
+		return
+	}
+
+	if tid, err := strconv.Atoi(id); err != nil || tid > 2147483647 {
+		respError := map[string]string{"error": "Задача не найдена"}
+		resp, err := json.Marshal(respError)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write(resp)
+		return
+
+	}
+	sqliteDatabase, err := sqlx.Connect("sqlite", "./scheduler.db")
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	defer sqliteDatabase.Close()
+	err = sqliteDatabase.Get(&getTask, "SELECT * FROM scheduler WHERE id = ?", id)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			respError := map[string]string{"error": "Задача не найдена"}
+			resp, err := json.Marshal(respError)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+			w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write(resp)
+			return
+		} else {
+			fmt.Printf("db err: %v", err)
+			fmt.Println("Get Task db aborted")
+			return
+		}
+	}
+	_, err = sqliteDatabase.Exec("DELETE FROM scheduler WHERE id = :id",
+		sql.Named("id", getTask.Id))
+	if err != nil {
+		if err == sql.ErrNoRows {
+			respError := map[string]string{"error": "Фэйл в удалении"}
+			resp, err := json.Marshal(respError)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+			w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write(resp)
+			return
+		} else {
+			fmt.Printf("db err: %v", err)
+			fmt.Println("Get Task db aborted")
+			return
+		}
+	}
+	taskid := map[string]string{}
+	resp, err := json.Marshal(taskid)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
+	//fmt.Println(fmt.Sprintf("%v", bytes.ReplaceAll(resp, []byte("\""), []byte(""))))
+	w.Write(resp)
+}
+
 func main() {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
@@ -674,6 +775,7 @@ func main() {
 	r.Get("/api/task", GetTask)
 	r.Get("/api/tasks", GetTasks)
 	r.Put("/api/task", EditTask)
+	r.Delete("/api/task", DeleteTask)
 	r.Post("/api/task/done", DoneTask)
 	http.ListenAndServe(":7540", r)
 }

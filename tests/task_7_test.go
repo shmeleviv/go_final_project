@@ -31,6 +31,7 @@ func TestDone(t *testing.T) {
 	})
 
 	ret, err := postJSON("api/task/done?id="+id, nil, http.MethodPost)
+	fmt.Printf("ret err: %v", err)
 	assert.NoError(t, err)
 	assert.Empty(t, ret)
 	notFoundTask(t, id)
@@ -39,6 +40,7 @@ func TestDone(t *testing.T) {
 		title:  "Проверить работу /api/task/done",
 		repeat: "d 3",
 	})
+	//now = now.AddDate(0, 0, 3)
 
 	for i := 0; i < 3; i++ {
 		ret, err := postJSON("api/task/done?id="+id, nil, http.MethodPost)
