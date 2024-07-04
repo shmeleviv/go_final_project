@@ -2,6 +2,7 @@ package tests
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"testing"
 	"time"
@@ -46,8 +47,11 @@ func TestDone(t *testing.T) {
 
 		var task Task
 		err = db.Get(&task, `SELECT * FROM scheduler WHERE id=?`, id)
+		fmt.Printf("Task7 date: %v, title: %v,comment: %v, repeat: %v ", task.Date, task.Title, task.Comment, task.Repeat)
+		fmt.Printf("Now before: %v", now.Format(`20060102`))
 		assert.NoError(t, err)
 		now = now.AddDate(0, 0, 3)
+		fmt.Printf("Now after: %v", now.Format(`20060102`))
 		assert.Equal(t, task.Date, now.Format(`20060102`))
 	}
 }
