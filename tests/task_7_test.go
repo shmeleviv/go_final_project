@@ -2,7 +2,6 @@ package tests
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"testing"
 	"time"
@@ -31,7 +30,6 @@ func TestDone(t *testing.T) {
 	})
 
 	ret, err := postJSON("api/task/done?id="+id, nil, http.MethodPost)
-	fmt.Printf("ret err: %v", err)
 	assert.NoError(t, err)
 	assert.Empty(t, ret)
 	notFoundTask(t, id)
@@ -40,7 +38,6 @@ func TestDone(t *testing.T) {
 		title:  "Проверить работу /api/task/done",
 		repeat: "d 3",
 	})
-	//now = now.AddDate(0, 0, 3)
 
 	for i := 0; i < 3; i++ {
 		ret, err := postJSON("api/task/done?id="+id, nil, http.MethodPost)
@@ -49,11 +46,8 @@ func TestDone(t *testing.T) {
 
 		var task Task
 		err = db.Get(&task, `SELECT * FROM scheduler WHERE id=?`, id)
-		fmt.Printf("Task7 date: %v, title: %v,comment: %v, repeat: %v ", task.Date, task.Title, task.Comment, task.Repeat)
-		fmt.Printf("Now before: %v", now.Format(`20060102`))
 		assert.NoError(t, err)
 		now = now.AddDate(0, 0, 3)
-		fmt.Printf("Now after: %v", now.Format(`20060102`))
 		assert.Equal(t, task.Date, now.Format(`20060102`))
 	}
 }
