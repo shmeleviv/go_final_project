@@ -10,9 +10,6 @@ import (
 
 func NextDate(now time.Time, date string, repeat string) (string, error) {
 
-	//if len(repeat) == 0 || repeat == "" {
-	//	return "repeat is empty format", errors.New("repeat is empty format")
-	//}
 	repeatSlice := strings.Split(repeat, " ")
 	if repeatSlice[0] == "d" && len(repeatSlice) < 2 {
 		return "incorrect d repeat format", errors.New("incorrect d repeat format")
@@ -36,7 +33,7 @@ func NextDate(now time.Time, date string, repeat string) (string, error) {
 						return "Incorrect date format", err
 					}
 					if dayCount == 1 {
-						//dateTime = dateTime.AddDate(0, 0, dayCount)
+
 						return fmt.Sprintf("%v", dateTime.Format("20060102")), nil
 					}
 					dateTime = dateTime.AddDate(0, 0, dayCount)
@@ -44,7 +41,7 @@ func NextDate(now time.Time, date string, repeat string) (string, error) {
 				}
 
 				if date > now.Format("20060102") {
-					fmt.Println("Case date is bigger than now date")
+
 					dateTime, err := time.Parse("20060102", date)
 					if err != nil {
 						return "Incorrect date format", err
@@ -58,7 +55,7 @@ func NextDate(now time.Time, date string, repeat string) (string, error) {
 					if err != nil {
 						return "Incorrect date format", err
 					}
-					fmt.Println("Case date is lower than now date")
+
 					for {
 						dateTime = dateTime.AddDate(0, 0, dayCount)
 						if dateTime.Format("20060102") < now.Format("20060102") {
@@ -75,8 +72,7 @@ func NextDate(now time.Time, date string, repeat string) (string, error) {
 		}
 
 	case "y":
-		fmt.Println("Case y works")
-		//newTime := now.AddDate(1, 0, 0)
+
 		dateTime, err := time.Parse("20060102", date)
 		if err != nil {
 			return "Incorrect date format", err
@@ -87,7 +83,7 @@ func NextDate(now time.Time, date string, repeat string) (string, error) {
 			if err != nil {
 				return "Incorrect date format", err
 			}
-			fmt.Println("Case date is lower than now date")
+
 			for {
 				dateTime = dateTime.AddDate(1, 0, 0)
 				if dateTime.Format("20060102") < now.Format("20060102") {
