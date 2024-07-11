@@ -8,6 +8,10 @@ import (
 	"time"
 )
 
+const (
+	DateFormat = "20060102"
+)
+
 func NextDate(now time.Time, date string, repeat string) (string, error) {
 
 	repeatSlice := strings.Split(repeat, " ")
@@ -27,41 +31,41 @@ func NextDate(now time.Time, date string, repeat string) (string, error) {
 			}
 			if dayCount >= 1 && dayCount <= 400 {
 
-				if date == now.Format("20060102") {
-					dateTime, err := time.Parse("20060102", date)
+				if date == now.Format(DateFormat) {
+					dateTime, err := time.Parse(DateFormat, date)
 					if err != nil {
 						return "Incorrect date format", err
 					}
 					if dayCount == 1 {
 
-						return fmt.Sprintf("%v", dateTime.Format("20060102")), nil
+						return fmt.Sprintf("%v", dateTime.Format(DateFormat)), nil
 					}
 					dateTime = dateTime.AddDate(0, 0, dayCount)
-					return fmt.Sprintf("%v", dateTime.Format("20060102")), nil
+					return fmt.Sprintf("%v", dateTime.Format(DateFormat)), nil
 				}
 
-				if date > now.Format("20060102") {
+				if date > now.Format(DateFormat) {
 
-					dateTime, err := time.Parse("20060102", date)
+					dateTime, err := time.Parse(DateFormat, date)
 					if err != nil {
 						return "Incorrect date format", err
 					}
 					dateTime = dateTime.AddDate(0, 0, dayCount)
-					return fmt.Sprintf("%v", dateTime.Format("20060102")), nil
+					return fmt.Sprintf("%v", dateTime.Format(DateFormat)), nil
 				}
 
-				if date < now.Format("20060102") {
-					dateTime, err := time.Parse("20060102", date)
+				if date < now.Format(DateFormat) {
+					dateTime, err := time.Parse(DateFormat, date)
 					if err != nil {
 						return "Incorrect date format", err
 					}
 
 					for {
 						dateTime = dateTime.AddDate(0, 0, dayCount)
-						if dateTime.Format("20060102") < now.Format("20060102") {
+						if dateTime.Format(DateFormat) < now.Format(DateFormat) {
 							continue
 						} else {
-							return fmt.Sprintf("%v", dateTime.Format("20060102")), nil
+							return fmt.Sprintf("%v", dateTime.Format(DateFormat)), nil
 						}
 
 					}
@@ -73,29 +77,29 @@ func NextDate(now time.Time, date string, repeat string) (string, error) {
 
 	case "y":
 
-		dateTime, err := time.Parse("20060102", date)
+		dateTime, err := time.Parse(DateFormat, date)
 		if err != nil {
 			return "Incorrect date format", err
 		}
 
-		if date < now.Format("20060102") {
-			dateTime, err := time.Parse("20060102", date)
+		if date < now.Format(DateFormat) {
+			dateTime, err := time.Parse(DateFormat, date)
 			if err != nil {
 				return "Incorrect date format", err
 			}
 
 			for {
 				dateTime = dateTime.AddDate(1, 0, 0)
-				if dateTime.Format("20060102") < now.Format("20060102") {
+				if dateTime.Format(DateFormat) < now.Format(DateFormat) {
 					continue
 				} else {
-					return fmt.Sprintf("%v", dateTime.Format("20060102")), nil
+					return fmt.Sprintf("%v", dateTime.Format(DateFormat)), nil
 				}
 
 			}
 		}
 		dateTime = dateTime.AddDate(1, 0, 0)
-		return fmt.Sprintf("%v", dateTime.Format("20060102")), nil
+		return fmt.Sprintf("%v", dateTime.Format(DateFormat)), nil
 	default:
 
 		return "Incorrect Format. Only d or y supporter", errors.New("Incorrect Format. Only d or y supporter")

@@ -25,7 +25,7 @@ func NewTaskService(taskRepository storage.SchedulerStore) TaskService {
 
 func (s *TaskService) GetAllTasks() ([]entities.SchedulerTask, error) {
 	nowTime := time.Now()
-	now := nowTime.Format("20060102")
+	now := nowTime.Format(datetime.DateFormat)
 	tasks, err := s.taskRepository.GetAll(now, GetAllTasksLimit)
 	if err != nil {
 		return nil, errors.New("Ошибка получения задачи из БД")
@@ -39,7 +39,7 @@ func (s *TaskService) SetTask(task entities.SchedulerTask) (string, error) {
 		return "", errors.New("Не указан заголовок задачи")
 	}
 
-	_, err := time.Parse("20060102", task.Date)
+	_, err := time.Parse(datetime.DateFormat, task.Date)
 	if err != nil && len(task.Date) != 0 && task.Date != "" {
 		return "", errors.New("Неправильный формат даты")
 
@@ -47,9 +47,9 @@ func (s *TaskService) SetTask(task entities.SchedulerTask) (string, error) {
 
 	if len(task.Repeat) != 0 && task.Repeat != "" {
 		if len(task.Date) == 0 || task.Date == "" {
-			task.Date = nowTime.Format("20060102")
+			task.Date = nowTime.Format(datetime.DateFormat)
 		}
-		if task.Date < nowTime.Format("20060102") {
+		if task.Date < nowTime.Format(datetime.DateFormat) {
 			task.Date, err = datetime.NextDate(nowTime, task.Date, task.Repeat)
 			if err != nil {
 				return "", errors.New("Ошибка функции nextDate")
@@ -58,8 +58,8 @@ func (s *TaskService) SetTask(task entities.SchedulerTask) (string, error) {
 		}
 	}
 	if len(task.Repeat) == 0 || task.Repeat == "" {
-		if len(task.Date) == 0 || task.Date == "" || task.Date < nowTime.Format("20060102") {
-			task.Date = nowTime.Format("20060102")
+		if len(task.Date) == 0 || task.Date == "" || task.Date < nowTime.Format(datetime.DateFormat) {
+			task.Date = nowTime.Format(datetime.DateFormat)
 		}
 
 	}
@@ -96,16 +96,16 @@ func (s *TaskService) EditTask(task entities.SchedulerTask) error {
 	if tid, err := strconv.Atoi(task.Id); err != nil || tid > 2147483647 {
 		return errors.New("Задача не найдена")
 	}
-	_, err := time.Parse("20060102", task.Date)
+	_, err := time.Parse(datetime.DateFormat, task.Date)
 	if err != nil && len(task.Date) != 0 && task.Date != "" {
 		return errors.New("Неправильный формат даты")
 
 	}
 	if len(task.Repeat) != 0 && task.Repeat != "" {
 		if len(task.Date) == 0 || task.Date == "" {
-			task.Date = nowTime.Format("20060102")
+			task.Date = nowTime.Format(datetime.DateFormat)
 		}
-		if task.Date <= nowTime.Format("20060102") {
+		if task.Date <= nowTime.Format(datetime.DateFormat) {
 			task.Date, err = datetime.NextDate(nowTime, task.Date, task.Repeat)
 			if err != nil {
 				return errors.New("Ошибка функции nextDate")
@@ -115,8 +115,8 @@ func (s *TaskService) EditTask(task entities.SchedulerTask) error {
 	}
 
 	if len(task.Repeat) == 0 || task.Repeat == "" {
-		if len(task.Date) == 0 || task.Date == "" || task.Date < nowTime.Format("20060102") {
-			task.Date = nowTime.Format("20060102")
+		if len(task.Date) == 0 || task.Date == "" || task.Date < nowTime.Format(datetime.DateFormat) {
+			task.Date = nowTime.Format(datetime.DateFormat)
 		}
 
 	}

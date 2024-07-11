@@ -28,7 +28,7 @@ func (h *TaskHandler) GetTaskHandler(w http.ResponseWriter, r *http.Request) {
 		resp, _ := json.Marshal(map[string]string{"error": fmt.Sprintf("%v", err)})
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write(resp)
+		_, _ = w.Write(resp)
 		return
 	}
 
@@ -40,7 +40,7 @@ func (h *TaskHandler) GetTaskHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write(resp)
+	_, _ = w.Write(resp)
 }
 
 func (h *TaskHandler) GetTasksHandler(w http.ResponseWriter, r *http.Request) {
@@ -49,7 +49,7 @@ func (h *TaskHandler) GetTasksHandler(w http.ResponseWriter, r *http.Request) {
 		resp, _ := json.Marshal(map[string]string{"error": fmt.Sprintf("%v", err)})
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write(resp)
+		_, _ = w.Write(resp)
 		return
 	}
 
@@ -60,7 +60,7 @@ func (h *TaskHandler) GetTasksHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write(resp)
+	_, _ = w.Write(resp)
 
 }
 
@@ -84,7 +84,7 @@ func (h *TaskHandler) SetTaskHandler(w http.ResponseWriter, r *http.Request) {
 		resp, _ := json.Marshal(map[string]string{"error": fmt.Sprintf("%v", err)})
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write(resp)
+		_, _ = w.Write(resp)
 		return
 	}
 
@@ -95,7 +95,7 @@ func (h *TaskHandler) SetTaskHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
-	w.Write(resp)
+	_, _ = w.Write(resp)
 }
 
 func (h *TaskHandler) EditTaskHandler(w http.ResponseWriter, r *http.Request) {
@@ -118,7 +118,7 @@ func (h *TaskHandler) EditTaskHandler(w http.ResponseWriter, r *http.Request) {
 		resp, _ := json.Marshal(map[string]string{"error": fmt.Sprintf("%v", err)})
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write(resp)
+		_, _ = w.Write(resp)
 		return
 	}
 
@@ -129,7 +129,7 @@ func (h *TaskHandler) EditTaskHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
-	w.Write(resp)
+	_, _ = w.Write(resp)
 }
 
 func (h *TaskHandler) DoneTaskHandler(w http.ResponseWriter, r *http.Request) {
@@ -141,7 +141,7 @@ func (h *TaskHandler) DoneTaskHandler(w http.ResponseWriter, r *http.Request) {
 		resp, _ := json.Marshal(map[string]string{"error": fmt.Sprintf("%v", err)})
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write(resp)
+		_, _ = w.Write(resp)
 		return
 	}
 
@@ -152,7 +152,7 @@ func (h *TaskHandler) DoneTaskHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
-	w.Write(resp)
+	_, _ = w.Write(resp)
 }
 
 func (h *TaskHandler) DeleteTaskHandler(w http.ResponseWriter, r *http.Request) {
@@ -163,7 +163,7 @@ func (h *TaskHandler) DeleteTaskHandler(w http.ResponseWriter, r *http.Request) 
 		resp, _ := json.Marshal(map[string]string{"error": fmt.Sprintf("%v", err)})
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write(resp)
+		_, _ = w.Write(resp)
 		return
 	}
 
@@ -174,14 +174,14 @@ func (h *TaskHandler) DeleteTaskHandler(w http.ResponseWriter, r *http.Request) 
 	}
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
-	w.Write(resp)
+	_, _ = w.Write(resp)
 }
 
 func (h *TaskHandler) NextDateHandler(w http.ResponseWriter, r *http.Request) {
 	now := r.FormValue("now")
 	date := r.FormValue("date")
 	repeat := r.FormValue("repeat")
-	nowTime, err := time.Parse("20060102", now)
+	nowTime, err := time.Parse(datetime.DateFormat, now)
 	if err != nil {
 		http.Error(w, "Incorrect now format", http.StatusBadRequest)
 		return
@@ -198,6 +198,6 @@ func (h *TaskHandler) NextDateHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write(bytes.ReplaceAll(resp, []byte("\""), []byte("")))
+	_, _ = w.Write(bytes.ReplaceAll(resp, []byte("\""), []byte("")))
 
 }
