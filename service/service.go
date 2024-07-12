@@ -2,11 +2,13 @@ package service
 
 import (
 	"errors"
-	datetime "go_final_project_ver3/datetime"
-	"go_final_project_ver3/entities"
-	storage "go_final_project_ver3/storage"
+	"math"
 	"strconv"
 	"time"
+
+	"go_final_project_ver3/datetime"
+	"go_final_project_ver3/entities"
+	"go_final_project_ver3/storage"
 )
 
 const (
@@ -24,9 +26,7 @@ func NewTaskService(taskRepository storage.SchedulerStore) TaskService {
 }
 
 func (s *TaskService) GetAllTasks() ([]entities.SchedulerTask, error) {
-	nowTime := time.Now()
-	now := nowTime.Format(datetime.DateFormat)
-	tasks, err := s.taskRepository.GetAll(now, GetAllTasksLimit)
+	tasks, err := s.taskRepository.GetAll(GetAllTasksLimit)
 	if err != nil {
 		return nil, errors.New("Ошибка получения задачи из БД")
 	}
@@ -165,21 +165,14 @@ func (s *TaskService) DoneTask(id string) error {
 }
 
 func (s *TaskService) DeleteTask(id string) error {
-	getTask := entities.SchedulerTask{}
 	if id == "" || len(id) == 0 {
 		return errors.New("Не указан идентификатор")
 	}
 
-	if tid, err := strconv.Atoi(id); err != nil || tid > 2147483647 {
+	if tid, err := strconv.Atoi(id); err != nil || tid > math.MaxInt32 {
 		return errors.New("Задача не найдена")
 	}
-
-	getTask, err := s.taskRepository.GetByID(id)
-	if err != nil {
-		return errors.New("Задача не найдена")
-	}
-
-	err = s.taskRepository.DeleteByID(getTask.Id)
+	err := s.taskRepository.DeleteByID(id)
 	if err != nil {
 		return errors.New("Ошибка удаления задачи")
 	}

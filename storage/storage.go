@@ -3,11 +3,12 @@ package storage
 import (
 	"database/sql"
 	"errors"
-	entities "go_final_project_ver3/entities"
 	"log"
 	"os"
 	"path/filepath"
 	"strconv"
+
+	"go_final_project_ver3/entities"
 
 	"github.com/jmoiron/sqlx"
 	_ "modernc.org/sqlite"
@@ -24,9 +25,9 @@ func NewSchedulerStore(db *sqlx.DB) SchedulerStore {
 	}
 }
 
-func (r *SchedulerStore) GetAll(time string, limit string) ([]entities.SchedulerTask, error) {
+func (r *SchedulerStore) GetAll(limit string) ([]entities.SchedulerTask, error) {
 	tasks := []entities.SchedulerTask{}
-	err := r.DB.Select(&tasks, `SELECT * FROM scheduler WHERE date >=? ORDER BY date LIMIT ?`, time, limit)
+	err := r.DB.Select(&tasks, `SELECT * FROM scheduler ORDER BY date LIMIT ?`, limit)
 	if err != nil {
 		return nil, errors.New("Ошибка получения задачи из БД")
 	}
@@ -146,7 +147,6 @@ func OpenSQLiteDB() (*sqlx.DB, error) {
 
 	if install {
 		InstallDB()
-
 	}
 	db, err := sqlx.Connect("sqlite", "./scheduler.db")
 	if err != nil {

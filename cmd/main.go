@@ -1,9 +1,9 @@
 package main
 
 import (
-	controller "go_final_project_ver3/controller"
-	service "go_final_project_ver3/service"
-	storage "go_final_project_ver3/storage"
+	"go_final_project_ver3/controller"
+	"go_final_project_ver3/service"
+	"go_final_project_ver3/storage"
 )
 
 func main() {
